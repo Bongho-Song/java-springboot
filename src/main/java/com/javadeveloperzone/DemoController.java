@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DemoController {
     @RequestMapping(value = "/")
     public String landing(){
-        return "Spring boot Gradle Example!!";
+        return "Spring boot Gradle Example!!!";
     }
     
     @RequestMapping(value = "hello")
