@@ -34,7 +34,7 @@ public class Scheduler {
 //	"0 0/30 8-10 * * *" = 8:00, 8:30, 9:00, 9:30, 10:00 and 10:30 every day.
 //	"0 0 9-17 * * MON-FRI" = 오전 9시부터 오후 5시까지 주중(월~금)에 실행한다.
 //	"0 0 0 25 12 ?" = every Christmas Day at midnight
-	@Scheduled(cron = "0 0 19 * * MON-FRI")
+	@Scheduled(cron = "0 0 18 * * MON-FRI")
     public void printDate () throws SQLException {
         System.out.println(new Date().toString());
         StockData stockData = new StockData();
