@@ -27,7 +27,16 @@ repositories {
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    
     implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    
+    //JdbcTemplate 추가
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    //postgreSQL
+	implementation 'org.postgresql:postgresql:42.6.0'
+	//log4jdbc-log4j2
+	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 }
 
 group 'spring-boot-demo'
