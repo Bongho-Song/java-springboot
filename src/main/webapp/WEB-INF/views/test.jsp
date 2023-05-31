@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="euc-kr">
 <title>Insert title here</title>
 <script src="https://unpkg.com/vue@2.3.3"></script>
 </head>
