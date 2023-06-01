@@ -51,8 +51,9 @@ public class Scheduler {
             String sql = "";
             sql += "INSERT INTO market_cap (";
         	sql += " " + Const.COL_NAME_ENTER_DATE;
-            sql += "," + Const.COL_NAME_SEQ;
+        	sql += "," + Const.COL_NAME_COMPANY_CODE;
         	sql += "," + Const.COL_NAME_COMPANY;
+            sql += "," + Const.COL_NAME_SEQ;
         	sql += "," + Const.COL_NAME_PRICE_CURRENT;
         	sql += "," + Const.COL_NAME_PRICE_DIFF;
         	sql += "," + Const.COL_NAME_PRICE_RATE;
@@ -64,7 +65,6 @@ public class Scheduler {
         	sql += "," + Const.COL_NAME_PER;
         	sql += "," + Const.COL_NAME_ROE;
         	sql += "," + Const.COL_NAME_UPDOWN;
-        	sql += "," + Const.COL_NAME_COMPANY_URL;
             sql += ") VALUES (";
             sql += " ?";
         	sql += ",?";
@@ -87,8 +87,9 @@ public class Scheduler {
             
             int idx = 1;
          	setDate(pstmt, idx++, sqlDate);
-            setInt(pstmt, idx++, stock.get(Const.COL_NAME_SEQ));
+            setString(pstmt, idx++, stock.get(Const.COL_NAME_COMPANY_CODE));
             setString(pstmt, idx++, stock.get(Const.COL_NAME_COMPANY));
+            setInt(pstmt, idx++, stock.get(Const.COL_NAME_SEQ));
          	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_CURRENT));
          	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_DIFF));
          	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_RATE));
@@ -100,7 +101,6 @@ public class Scheduler {
          	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PER));
          	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_ROE));
          	setString(pstmt, idx++, stock.get(Const.COL_NAME_UPDOWN));
-         	setString(pstmt, idx++, stock.get(Const.COL_NAME_COMPANY_URL));
 
          	pstmt.executeUpdate();
 		}

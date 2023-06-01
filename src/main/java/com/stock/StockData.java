@@ -261,7 +261,13 @@ public class StockData {
 					colIdx++;
 				}
 				
-				stockMap.put(Const.COL_NAME_COMPANY_URL, detailUrl);
+				String company_code = null;
+				if (detailUrl != null) {
+					company_code = detailUrl.substring(detailUrl.indexOf("code=")+"code=".length());	
+				}
+				
+				
+				stockMap.put(Const.COL_NAME_COMPANY_CODE, company_code);
 				stockMap.put(Const.COL_NAME_UPDOWN, updown);
 				
 				retList.add(stockMap);

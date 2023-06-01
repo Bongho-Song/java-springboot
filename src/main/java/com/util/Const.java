@@ -2,10 +2,13 @@ package com.util;
 
 public final class Const {
 	public static final String URL_KOSPI_SEQUENCE = "https://finance.naver.com/sise/sise_market_sum.naver?&page="; // 시가총액 URL
+	public static final String URL_ITEM_TRADING_TREND = "https://finance.naver.com/item/frgn.naver?code="; // 투자자별 매매동향
 	
 	// 주식 관련 컬럼
-	public static final String COL_NAME_SEQ = "seq"; // 시가총액 순서
+	public static final String COL_NAME_ENTER_DATE = "enter_date";	// 입력날짜
+	public static final String COL_NAME_COMPANY_CODE = "company_code";	// 종목코드
 	public static final String COL_NAME_COMPANY = "company";	// 종목명
+	public static final String COL_NAME_SEQ = "seq"; // 시가총액 순서
 	public static final String COL_NAME_PRICE_CURRENT = "price_current";	// 현재가
 	public static final String COL_NAME_PRICE_DIFF = "price_diff";	// 전일비
 	public static final String COL_NAME_PRICE_RATE = "price_rate";	// 등락률
@@ -17,8 +20,6 @@ public final class Const {
 	public static final String COL_NAME_PER = "per";	// PER
 	public static final String COL_NAME_ROE = "roe";	// ROE
 	public static final String COL_NAME_UPDOWN = "updown";	// 상승/하락/보합
-	public static final String COL_NAME_COMPANY_URL = "company_url";	// 종목 상세 페이지
-	public static final String COL_NAME_ENTER_DATE = "enter_date";	// 입력날짜
 	
 	// 컬럼 순서
 	public static final String[] COL_TITLE_LIST = { 
