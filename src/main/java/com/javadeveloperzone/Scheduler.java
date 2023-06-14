@@ -1,12 +1,9 @@
 package com.javadeveloperzone;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 
 import javax.sql.DataSource;
 
@@ -15,8 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.stock.StockData;
-import com.util.Const;
+import com.stock.InsertStockData;
 
 @Component
 public class Scheduler {
@@ -37,102 +33,24 @@ public class Scheduler {
 //    @Scheduled(cron = "0 0/1 * * * MON-FRI")
 	@Scheduled(cron = "0 0 18 * * MON-FRI")
     public void printDate () throws SQLException {
-        StockData stockData = new StockData();
-        ArrayList<HashMap<String, String>> stockList = stockData.getStockData();
-        
+		System.out.println("@@@ Schedule Start !!! " + getCurrentDate());
+		
         Connection conn = dataSource.getConnection();
         System.out.println("Database connected ["+dataSource.getClass()+"] ["+conn.getMetaData().getURL());
         
-        java.sql.Date sqlDate = new java.sql.Date(new Date().getTime());
-    	for (int i = 0; i < stockList.size(); i++) {
-    		HashMap<String, String> stock = stockList.get(i);
-			System.out.println("["+i+"] Insert data: " + stock.toString());
-            
-            String sql = "";
-            sql += "INSERT INTO market_cap (";
-        	sql += " " + Const.COL_NAME_ENTER_DATE;
-        	sql += "," + Const.COL_NAME_COMPANY_CODE;
-        	sql += "," + Const.COL_NAME_COMPANY;
-            sql += "," + Const.COL_NAME_SEQ;
-        	sql += "," + Const.COL_NAME_PRICE_CURRENT;
-        	sql += "," + Const.COL_NAME_PRICE_DIFF;
-        	sql += "," + Const.COL_NAME_PRICE_RATE;
-        	sql += "," + Const.COL_NAME_PAR_VALUE;
-        	sql += "," + Const.COL_NAME_PRICE_TOTAL;
-        	sql += "," + Const.COL_NAME_NUMBER_TOTAL;
-        	sql += "," + Const.COL_NAME_FOREIGNER_RATE;
-        	sql += "," + Const.COL_NAME_TRADING_VOLUME;
-        	sql += "," + Const.COL_NAME_PER;
-        	sql += "," + Const.COL_NAME_ROE;
-        	sql += "," + Const.COL_NAME_UPDOWN;
-            sql += ") VALUES (";
-            sql += " ?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-        	sql += ",?";
-            sql += ")";
-         	
-            PreparedStatement pstmt = conn.prepareStatement(sql);
-            
-            int idx = 1;
-         	setDate(pstmt, idx++, sqlDate);
-            setString(pstmt, idx++, stock.get(Const.COL_NAME_COMPANY_CODE));
-            setString(pstmt, idx++, stock.get(Const.COL_NAME_COMPANY));
-            setInt(pstmt, idx++, stock.get(Const.COL_NAME_SEQ));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_CURRENT));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_DIFF));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_RATE));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PAR_VALUE));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_TOTAL));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_NUMBER_TOTAL));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_FOREIGNER_RATE));
-         	setInt(pstmt, idx++, stock.get(Const.COL_NAME_TRADING_VOLUME));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PER));
-         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_ROE));
-         	setString(pstmt, idx++, stock.get(Const.COL_NAME_UPDOWN));
-
-         	pstmt.executeUpdate();
-		}
+        InsertStockData InsertStockData = new InsertStockData();
+        InsertStockData.insert(conn);
     	
-    	if(conn != null) {
-    		conn.close();
+    	if(conn != null) { 
+    		try {conn.close();} catch (Exception e) { } 
     		System.out.println("Connection Close Complete !!! ");
     	} 
     	
+    	System.out.println("@@@ Schedule End !!! " + getCurrentDate());
     }
-	
-	private void setDate(PreparedStatement pstmt, int idx, java.sql.Date v) throws SQLException {
-		pstmt.setDate(idx++, v);
-	}
-	
-	private void setString(PreparedStatement pstmt, int idx, String v) throws SQLException {
-		pstmt.setString(idx++, v);
-	}
-	
-	private void setInt(PreparedStatement pstmt, int idx, String v) throws SQLException {
-		if ("N/A".equals(v) || v == null) {
-			pstmt.setNull(idx, Types.INTEGER);
-		} else {
-			pstmt.setDouble(idx, Integer.parseInt(v));
-		}
-	}
-	
-	private void setDouble(PreparedStatement pstmt, int idx, String v) throws SQLException {
-		if ("N/A".equals(v) || v == null) {
-			pstmt.setNull(idx, Types.DOUBLE);
-		} else {
-			pstmt.setDouble(idx, Double.parseDouble(v));
-		}
-	}
+    
+    private String getCurrentDate() {
+    	SimpleDateFormat  formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return formatter.format(new Date());
+    }
 }
