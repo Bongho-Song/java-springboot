@@ -18,18 +18,31 @@ import javax.net.ssl.SSLSession;
 import com.util.Const;
 import com.util.StringUtil;
 
-public class StockData {
+public class GetInvestorTrading {
 	
-	public ArrayList<HashMap<String, String>> getStockData() {
+	public ArrayList<HashMap<String, String>> getStockData(String company_code) {
 		ArrayList<HashMap<String, String>> stockList = new ArrayList<>();
 		
 		int page = 1;
+		//int maxPage = 67;
+		int maxPage = 18;
+		
+		String prev_trading_date = "";
 		while (true) {
-			ArrayList<HashMap<String, String>> retList = getStockKospiSequence(page);
+			ArrayList<HashMap<String, String>> retList = getStockTradingTrend(company_code, page);
 			
-			if (retList.size() == 0) {
+			// 반환된 데이터가 없거나 MaxPage가 넘어가면 break
+			if (retList.size() == 0 || page > maxPage) {
 				break;
 			}
+			
+			// 이전 날짜와 조회된 List의 0번째의 날짜가 같다면 break -> 최근 상장된 주식은 67번째 Page가 없음에되 데이터가 조회됨
+			String trading_date = retList.get(0).get(Const.COL_NAME_TRADING_DATE);
+			if (prev_trading_date.equals(trading_date)) {
+				break;
+			}
+			
+			prev_trading_date = trading_date;
 			
 			stockList.addAll(retList);
 			
@@ -40,11 +53,13 @@ public class StockData {
 		
 		return stockList;
 	}
-	private ArrayList<HashMap<String, String>> getStockKospiSequence(int page) {
+	private ArrayList<HashMap<String, String>> getStockTradingTrend(String company_code, int page) {
 		ArrayList<HashMap<String, String>> retList = new ArrayList<>();
 		
 		// 시가 총액 화면
-		String urlString = Const.URL_KOSPI_SEQUENCE + page;
+		String urlString = Const.URL_ITEM_TRADING_TREND + page;
+		urlString = urlString.replace("{code}", company_code);
+			
 		String line = null;
 		InputStream in = null;
 		BufferedReader reader = null; 
@@ -67,10 +82,10 @@ public class StockData {
 			httpsConn.setConnectTimeout(1000);
 			httpsConn.setRequestMethod("GET");
 			httpsConn.setRequestProperty("HeaderKey","HeaderValue");
-			
+			httpsConn.setRequestProperty("User-agent","Mozilla/5.0");
+
 			int responseCode = httpsConn.getResponseCode();
-//			System.out.println("응답코드 : " + responseCode);
-//			System.out.println("응답메세지 : " + httpsConn.getResponseMessage());
+			System.out.println("RespCode [" + responseCode + "] URL: " + urlString);
 			
 			// SSL setting
 			SSLContext context = SSLContext.getInstance("TLS");
@@ -93,7 +108,7 @@ public class StockData {
 			
 			while ((line = reader.readLine()) != null) {
 				//테이블 시작
-				if (line.contains("<h4 class=\"blind\">코스피</h4>")) {
+				if (line.contains("summary=\"외국인 기관 순매매 거래량")) {
 					kospi_table_start = true;
 					continue;
 				} 
@@ -182,8 +197,8 @@ public class StockData {
 			 * [2]: <tr  onMouseOver="mouseOver(this)" onMouseOut="mouseOut(this)"><td class="no">2</td><td><a href="/item/main.naver?code=373220" class="tltle">LG에너지솔루션</a></td><td class="number">523,000</td><td class="number"><img src="https://ssl.pstatic.net/imgstock/images/images4/ico_up.gif" width="7" height="6" style="margin-right:4px;" alt="상승"><span class="tah p11 red02">15,000</span></td><td class="number"><span class="tah p11 red01">+2.95%</span></td><td class="number">500</td><td class="number">1,223,820</td><td class="number">234,000</td><td class="number">5.27</td><td class="number">413,128</td><td class="number">213.12</td><td class="number">10.68</td><td class="center"><a href="/item/board.naver?code=373220"><img src="https://ssl.pstatic.net/imgstock/images5/ico_debatebl2.gif" width="15" height="13" alt="토론실"></a></td></tr>
 			 */
 			// Body (주식종목) 찾기
-			for (int i = 1; i < trList.size(); i++) {
-//			for (int i = 1; i < 3; i++) {
+			for (int i = 2; i < trList.size(); i++) {
+//			for (int i = 2; i < 3; i++) {
 				String bodyStr = trList.get(i);
 				indexStart = 0;
 				indexEnd = 0;
@@ -211,7 +226,7 @@ public class StockData {
 					String tdStr = bodyStr.substring(indexStart, indexEnd);
 //					System.out.println(" @@@ TEST 출력 주식종목 : " + tdStr);
 					
-					if (tdStr.contains("토론실")) {
+					if (tdStr.contains("&nbsp;")) {
 						continue;
 					}
 					
@@ -249,28 +264,25 @@ public class StockData {
 					String value = tdStr.substring(tdStr.indexOf(findStrStart, subIndexStart) + 1, tdStr.indexOf(findStrEnd, subIndexEnd));
 					
 					// 상승/하락/보합 확인
-					if (value.contains("%")) {
+					if ("".equals(updown) && value.contains("%")) {
 						updown = StringUtil.getUpDown(value);	
 					}
 					
 					// 문자열 치환(",", "%", "+", "-" 문자열은 사용하지 않음)
 					value = StringUtil.deleteSpecialSymbol(value);
 					
-					stockMap.put(Const.COL_TITLE_LIST[colIdx], value);
+					stockMap.put(Const.TREND_COL_TITLE_LIST[colIdx], value);
 					
 					colIdx++;
 				}
 				
-				String company_code = null;
-				if (detailUrl != null) {
-					company_code = detailUrl.substring(detailUrl.indexOf("code=")+"code=".length());	
+				if (stockMap.size() != 0) {
+					stockMap.put(Const.COL_NAME_COMPANY_CODE, company_code);
+					stockMap.put(Const.COL_NAME_UPDOWN, updown);
+					
+					retList.add(stockMap);
 				}
 				
-				
-				stockMap.put(Const.COL_NAME_COMPANY_CODE, company_code);
-				stockMap.put(Const.COL_NAME_UPDOWN, updown);
-				
-				retList.add(stockMap);
 				stockMap = null;
 			}
 			

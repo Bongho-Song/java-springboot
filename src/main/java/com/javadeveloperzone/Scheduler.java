@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import com.stock.InsertStockData;
+import com.stock.InsertMarketCap;
 
 @Component
 public class Scheduler {
@@ -32,19 +32,28 @@ public class Scheduler {
 //	"0 0 0 25 12 ?" = every Christmas Day at midnight
 //    @Scheduled(cron = "0 0/1 * * * MON-FRI")
 	@Scheduled(cron = "0 0 18 * * MON-FRI")
-    public void printDate () throws SQLException {
+    public void printDate () {
 		System.out.println("@@@ Schedule Start !!! " + getCurrentDate());
 		
-        Connection conn = dataSource.getConnection();
-        System.out.println("Database connected ["+dataSource.getClass()+"] ["+conn.getMetaData().getURL());
+        Connection conn = null;
         
-        InsertStockData InsertStockData = new InsertStockData();
-        InsertStockData.insert(conn);
-    	
-    	if(conn != null) { 
-    		try {conn.close();} catch (Exception e) { } 
-    		System.out.println("Connection Close Complete !!! ");
-    	} 
+        try {
+        	conn = dataSource.getConnection();
+        	System.out.println("Database connected ["+dataSource.getClass()+"] ["+conn.getMetaData().getURL());
+            
+            // 시가총액 Insert
+            InsertMarketCap insertStockData = new InsertMarketCap();
+            insertStockData.insert(conn);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(conn != null) { 
+	    		try {conn.close();} catch (Exception e) { } 
+	    		System.out.println("Connection Close Complete !!! ");
+	    	} 
+		}
     	
     	System.out.println("@@@ Schedule End !!! " + getCurrentDate());
     }

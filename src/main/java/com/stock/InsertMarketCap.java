@@ -10,20 +10,25 @@ import java.util.HashMap;
 import com.util.Const;
 import com.util.SQLTransaction;
 
-public class InsertStockData extends SQLTransaction{
+/**
+ * 시가총액 데이터를 PostgreSQL에 삽입하는 클래스
+ * @author Bongho
+ *
+ */
+public class InsertMarketCap extends SQLTransaction {
 
 	public void insert(Connection conn) {
-		StockData stockData = new StockData();
-        ArrayList<HashMap<String, String>> stockList = stockData.getStockData();
+		GetMarketCap marketCapData = new GetMarketCap();
+        ArrayList<HashMap<String, String>> marketCapList = marketCapData.getStockData();
         
 		PreparedStatement pstmt = null;
         
 		try {
 			java.sql.Date sqlDate = new java.sql.Date(new Date().getTime());
 			
-	    	for (int i = 0; i < stockList.size(); i++) {
-	    		HashMap<String, String> stock = stockList.get(i);
-				System.out.println("["+i+"] Insert data: " + stock.toString());
+	    	for (int i = 0; i < marketCapList.size(); i++) {
+	    		HashMap<String, String> marketCap = marketCapList.get(i);
+				System.out.println("@@@ InsertMarketCap Insert data["+i+"]: " + marketCap.toString());
 	            
 	            String sql = "";
 	            sql += "INSERT INTO market_cap (";
@@ -64,27 +69,29 @@ public class InsertStockData extends SQLTransaction{
 	            
 	            int idx = 1;
 	         	setDate(pstmt, idx++, sqlDate);
-	            setString(pstmt, idx++, stock.get(Const.COL_NAME_COMPANY_CODE));
-	            setString(pstmt, idx++, stock.get(Const.COL_NAME_COMPANY));
-	            setInt(pstmt, idx++, stock.get(Const.COL_NAME_SEQ));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_CURRENT));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_DIFF));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_RATE));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PAR_VALUE));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PRICE_TOTAL));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_NUMBER_TOTAL));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_FOREIGNER_RATE));
-	         	setInt(pstmt, idx++, stock.get(Const.COL_NAME_TRADING_VOLUME));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_PER));
-	         	setDouble(pstmt, idx++, stock.get(Const.COL_NAME_ROE));
-	         	setString(pstmt, idx++, stock.get(Const.COL_NAME_UPDOWN));
+	            setString(pstmt, idx++, marketCap.get(Const.COL_NAME_COMPANY_CODE));
+	            setString(pstmt, idx++, marketCap.get(Const.COL_NAME_COMPANY));
+	            setInt(pstmt, idx++, marketCap.get(Const.COL_NAME_SEQ));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_PRICE_CURRENT));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_PRICE_DIFF));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_PRICE_RATE));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_PAR_VALUE));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_PRICE_TOTAL));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_NUMBER_TOTAL));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_FOREIGNER_RATE));
+	         	setInt(pstmt, idx++, marketCap.get(Const.COL_NAME_TRADING_VOLUME));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_PER));
+	         	setDouble(pstmt, idx++, marketCap.get(Const.COL_NAME_ROE));
+	         	setString(pstmt, idx++, marketCap.get(Const.COL_NAME_UPDOWN));
 
 	         	pstmt.executeUpdate();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
-			if(conn != null) try {conn.close();} catch (Exception e) { } 
+			if(pstmt != null) try {pstmt.close();} catch (Exception e) { } 
 		}
 	}
 }
