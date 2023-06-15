@@ -45,8 +45,10 @@ public class GetMarketCap {
 		
 		// 시가 총액 화면
 		String urlString = Const.URL_KOSPI_SEQUENCE + page;
+		
 		String line = null;
 		InputStream in = null;
+		InputStreamReader isr = null;
 		BufferedReader reader = null; 
 		HttpsURLConnection httpsConn = null;
 		
@@ -85,7 +87,9 @@ public class GetMarketCap {
 			} else {
 				in = httpsConn.getErrorStream();
 			}
-			reader = new BufferedReader(new InputStreamReader(in, "euc-kr"));
+			
+			isr = new InputStreamReader(in, "euc-kr");
+			reader = new BufferedReader(isr);
 
 			boolean kospi_table_start = false;
 			
@@ -287,16 +291,10 @@ public class GetMarketCap {
         	e.printStackTrace();
         	System.out.println("error : " + e);
         } finally {
-            if (reader != null) {
-            	try {
-					reader.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-            }
-            if (httpsConn != null) {
-                httpsConn.disconnect(); 
-            }
+        	if (in != null) try {in.close();} catch (Exception e) {}
+        	if (isr != null) try {isr.close();} catch (Exception e) {}
+            if (reader != null) try {reader.close();} catch (Exception e) {}
+            if (httpsConn != null) httpsConn.disconnect(); 
         }	
 		
 		return retList;
