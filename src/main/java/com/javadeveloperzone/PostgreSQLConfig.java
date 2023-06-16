@@ -35,23 +35,23 @@ public class PostgreSQLConfig implements ApplicationRunner {
 //        jdbcTemplate.execute("INSERT INTO TBL_TEST VALUES (1, 'ssjeong')");
     	
     	// 테스트 소스
-    	Connection conn = null;
-    	try {
-        	conn = dataSource.getConnection();
-            
-        	// 시가총액 Insert
-        	InsertInvestorTrading iit = new InsertInvestorTrading();
-        	iit.insertTest(conn);
-        	
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if(conn != null) { 
-	    		try {conn.close();} catch (Exception e) { } 
-	    		System.out.println("Connection Close Complete !!! ");
-	    	} 
-		}
+//    	Connection conn = null;
+//    	try {
+//        	conn = dataSource.getConnection();
+//            
+//        	// 시가총액 Insert
+//        	InsertInvestorTrading iit = new InsertInvestorTrading();
+//        	iit.insertTest(conn);
+//        	
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		} finally {
+//			if(conn != null) { 
+//	    		try {conn.close();} catch (Exception e) { } 
+//	    		System.out.println("Connection Close Complete !!! ");
+//	    	} 
+//		}
     }
 }
