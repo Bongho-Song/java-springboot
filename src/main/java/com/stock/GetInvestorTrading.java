@@ -24,14 +24,20 @@ public class GetInvestorTrading {
 		ArrayList<HashMap<String, String>> stockList = new ArrayList<>();
 		
 		int page = 1;
-		int maxPage = 20;
+		int maxPage = 1;//20;
 		
 		String prev_trading_date = "";
 		while (true) {
+			// MaxPage가 넘어가면 break
+			if (page > maxPage) {
+				break;
+			}
+			
+			// 투자자별 매매동향 Page의 데이터 가져오기
 			ArrayList<HashMap<String, String>> retList = getStockTradingTrend(company_code, page);
 			
-			// 반환된 데이터가 없거나 MaxPage가 넘어가면 break
-			if (retList.size() == 0 || page > maxPage) {
+			// 반환된 데이터가 없거나 
+			if (retList.size() == 0) {
 				break;
 			}
 			

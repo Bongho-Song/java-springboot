@@ -2,6 +2,7 @@ package com.stock;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,19 +46,22 @@ public class InsertInvestorTrading extends SQLTransaction {
 		GetInvestorTrading investorTrading = new GetInvestorTrading();
       
 		ArrayList<HashMap<String, String>> trandList = investorTrading.getStockData(companyCode);
-		System.out.println("@@@ Company_code["+companyCode+"] Insert investor trading data Cnt: " + trandList.size());
         
+		// 최근 삽입된 Trading 일자 가져오기
+		String recentTradingDate = getRecentTradingDate(conn, companyCode);
+		
+		System.out.println("@@@ Company_code["+companyCode+"] Insert investor trading data Cnt: " + trandList.size() + ", recentTradingDate: " + recentTradingDate);
+
 		PreparedStatement pstmt = null;
-        
 		
 		while (trandList.size() != 0) {
     		HashMap<String, String> trand = trandList.get(0);
             
-    		// 테스트 소스
-			if ("2023.06.20".equals(trand.get(Const.COL_NAME_TRADING_DATE))) {
+    		// 최근 삽입된 Trading 일자가 같으면 break
+			if (recentTradingDate.equals(trand.get(Const.COL_NAME_TRADING_DATE))) {
 				trandList.remove(trand);
 	    		trand = null;
-				continue;
+				break;
 			}
 			
             // Trading 날짜가 없으면 Insert 하지 않음
@@ -128,5 +132,48 @@ public class InsertInvestorTrading extends SQLTransaction {
     		trandList.remove(trand);
     		trand = null;
 		}
+	}
+	
+	/**
+	 * 투자자별 매매동향 최근 입력된 일자
+	 * @param conn
+	 * @param companyCode
+	 * @return
+	 */
+	public String getRecentTradingDate(Connection conn, String companyCode) {
+		System.out.println("@@@ Company_code["+companyCode+"] Insert investor trading data Cnt: ");
+        
+		String retVal = "";
+		
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+            
+        String sql = "";
+        sql += "SELECT TO_CHAR(MAX(trading_date), 'yyyy.mm.dd') AS recent_trading_date ";
+        sql += "  FROM investor_trading ";
+        sql += " WHERE company_code = ? ";
+       
+        try {
+            pstmt = conn.prepareStatement(sql);
+            
+            int idx = 1;
+            setString(pstmt, idx++, companyCode);
+
+            rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+            	retVal = rs.getString("recent_trading_date");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) try {rs.close();} catch (Exception e) { } 
+			if(pstmt != null) try {pstmt.close();} catch (Exception e) { } 
+		}
+        
+        return retVal;
 	}
 }
