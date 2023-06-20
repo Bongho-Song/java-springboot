@@ -24,8 +24,7 @@ public class GetInvestorTrading {
 		ArrayList<HashMap<String, String>> stockList = new ArrayList<>();
 		
 		int page = 1;
-		//int maxPage = 67;
-		int maxPage = 18;
+		int maxPage = 20;
 		
 		String prev_trading_date = "";
 		while (true) {
@@ -45,8 +44,6 @@ public class GetInvestorTrading {
 			prev_trading_date = trading_date;
 			
 			stockList.addAll(retList);
-			
-//			System.out.println("page: " + page + " / stockList.size: " + stockList.size());
 			
 			page++;
 		}
@@ -86,7 +83,7 @@ public class GetInvestorTrading {
 			httpsConn.setRequestProperty("User-agent","Mozilla/5.0");
 
 			int responseCode = httpsConn.getResponseCode();
-			System.out.println("RespCode [" + responseCode + "] URL: " + urlString);
+//			System.out.println("RespCode [" + responseCode + "] URL: " + urlString);
 			
 			// SSL setting
 			SSLContext context = SSLContext.getInstance("TLS");

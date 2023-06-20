@@ -27,79 +27,78 @@ public class InsertInvestorTrading extends SQLTransaction {
 		GetMarketCap marketCapData = new GetMarketCap();
 		ArrayList<HashMap<String, String>> marketCapList = marketCapData.getStockData();
 
+		// 투자자별 매매동향 데이터 삽입을 제외할 종목
 		HashMap<String, String> exceptList = Const.getExceptCompany();
-		System.out.println("size: " + exceptList.size());
-		
-		for (int i = 0; i < marketCapList.size(); i++) {
-			String company_code = marketCapList.get(i).get(Const.COL_NAME_COMPANY_CODE);
 
-			System.out.println("@@@ Company: " + company_code);
+		while (marketCapList.size() != 0) {
+			String company_code = marketCapList.get(0).get(Const.COL_NAME_COMPANY_CODE);
 			
 			if (!exceptList.containsKey(company_code)) {
 				insert(conn, company_code);
 			}
 			
-//			if (i == 2) {
-//				break;
-//			}
+			marketCapList.remove(0);
 		}
 	}
     
 	public void insert(Connection conn, String companyCode) {
-      GetInvestorTrading investorTrading = new GetInvestorTrading();
-      ArrayList<HashMap<String, String>> trandList = investorTrading.getStockData(companyCode);
+		GetInvestorTrading investorTrading = new GetInvestorTrading();
+      
+		ArrayList<HashMap<String, String>> trandList = investorTrading.getStockData(companyCode);
+		System.out.println("@@@ Company_code["+companyCode+"] Insert investor trading data Cnt: " + trandList.size());
         
 		PreparedStatement pstmt = null;
         
-		try {
-	    	for (int i = 0; i < trandList.size(); i++) {
-	    		HashMap<String, String> trand = trandList.get(i);
-	            
-	    		// 테스트 소스
-//	    		if (i == 5) {
-//					break;
-//				}
-	    		// 테스트 소스
-				if ("2023.06.15".equals(trand.get(Const.COL_NAME_TRADING_DATE))) {
-					continue;
-				}
-				
-
-	            // Trading 날짜가 없으면 Insert 하지 않음
-	            Date tradingDate = stringToDate("yyyy.MM.dd", trand.get(Const.COL_NAME_TRADING_DATE));
-	            if (tradingDate == null) {
-					continue;
-				}
-	            
-				System.out.println("@@@ InsertInvestorTrading Insert data["+i+"]: " + trand.toString());
-				
-	            String sql = "";
-	            sql += "INSERT INTO investor_trading (";
-	        	sql += " " + Const.COL_NAME_COMPANY_CODE;
-	        	sql += "," + Const.COL_NAME_UPDOWN;
-	        	sql += "," + Const.COL_NAME_TRADING_DATE;
-	            sql += "," + Const.COL_NAME_PRICE_LAST;
-	        	sql += "," + Const.COL_NAME_PRICE_DIFF;
-	        	sql += "," + Const.COL_NAME_PRICE_RATE;
-	        	sql += "," + Const.COL_NAME_TRADING_VOLUME;
-	        	sql += "," + Const.COL_NAME_RETAIL_TRADING;
-	        	sql += "," + Const.COL_NAME_FOREIGN_TRADING;
-	        	sql += "," + Const.COL_NAME_FOREIGN_VOLUME;
-	        	sql += "," + Const.COL_NAME_FOREIGN_VOLUME_RATE;
-	            sql += ") VALUES (";
-	            sql += " ?";
-	        	sql += ",?";
-	        	sql += ",?";
-	        	sql += ",?";
-	        	sql += ",?";
-	        	sql += ",?";
-	        	sql += ",?";
-	        	sql += ",?";
-	        	sql += ",?";
-	        	sql += ",?";
-	        	sql += ",?";
-	            sql += ")";
-	         	
+		
+		while (trandList.size() != 0) {
+    		HashMap<String, String> trand = trandList.get(0);
+            
+    		// 테스트 소스
+			if ("2023.06.20".equals(trand.get(Const.COL_NAME_TRADING_DATE))) {
+				trandList.remove(trand);
+	    		trand = null;
+				continue;
+			}
+			
+            // Trading 날짜가 없으면 Insert 하지 않음
+            Date tradingDate = stringToDate("yyyy.MM.dd", trand.get(Const.COL_NAME_TRADING_DATE));
+            if (tradingDate == null) {
+            	trandList.remove(trand);
+        		trand = null;
+				continue;
+			}
+            
+			System.out.println("@@@ InsertInvestorTrading Insert data: " + trand.toString());
+			
+            String sql = "";
+            sql += "INSERT INTO investor_trading (";
+        	sql += " " + Const.COL_NAME_COMPANY_CODE;
+        	sql += "," + Const.COL_NAME_UPDOWN;
+        	sql += "," + Const.COL_NAME_TRADING_DATE;
+            sql += "," + Const.COL_NAME_PRICE_LAST;
+        	sql += "," + Const.COL_NAME_PRICE_DIFF;
+        	sql += "," + Const.COL_NAME_PRICE_RATE;
+        	sql += "," + Const.COL_NAME_TRADING_VOLUME;
+        	sql += "," + Const.COL_NAME_RETAIL_TRADING;
+        	sql += "," + Const.COL_NAME_FOREIGN_TRADING;
+        	sql += "," + Const.COL_NAME_FOREIGN_VOLUME;
+        	sql += "," + Const.COL_NAME_FOREIGN_VOLUME_RATE;
+            sql += ") VALUES (";
+            sql += " ?";
+        	sql += ",?";
+        	sql += ",?";
+        	sql += ",?";
+        	sql += ",?";
+        	sql += ",?";
+        	sql += ",?";
+        	sql += ",?";
+        	sql += ",?";
+        	sql += ",?";
+        	sql += ",?";
+            sql += ")";
+         	
+            try {
+            	
 	            pstmt = conn.prepareStatement(sql);
 	            
 	            int idx = 1;
@@ -117,13 +116,17 @@ public class InsertInvestorTrading extends SQLTransaction {
 	         	setDouble(pstmt, idx++, trand.get(Const.COL_NAME_FOREIGN_VOLUME_RATE));
 
 	         	pstmt.executeUpdate();
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if(pstmt != null) try {pstmt.close();} catch (Exception e) { } 
+
+    		} catch (SQLException e) {
+    			e.printStackTrace();
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		} finally {
+    			if(pstmt != null) try {pstmt.close();} catch (Exception e) { } 
+    		}
+    		
+    		trandList.remove(trand);
+    		trand = null;
 		}
 	}
 }
