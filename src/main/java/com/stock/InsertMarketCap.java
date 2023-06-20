@@ -17,7 +17,7 @@ import com.util.SQLTransaction;
  */
 public class InsertMarketCap extends SQLTransaction {
 
-	public void insert(Connection conn) {
+	public ArrayList<HashMap<String, String>> insert(Connection conn) {
 		GetMarketCap marketCapData = new GetMarketCap();
         ArrayList<HashMap<String, String>> marketCapList = marketCapData.getStockData();
         
@@ -93,5 +93,7 @@ public class InsertMarketCap extends SQLTransaction {
 		} finally {
 			if(pstmt != null) try {pstmt.close();} catch (Exception e) { } 
 		}
+		
+		return marketCapList;
 	}
 }

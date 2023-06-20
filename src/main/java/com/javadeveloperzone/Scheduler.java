@@ -3,7 +3,9 @@ package com.javadeveloperzone;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.sql.DataSource;
 
@@ -12,7 +14,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.stock.InsertInvestorTrading;
 import com.stock.InsertMarketCap;
+import com.util.Const;
 
 @Component
 public class Scheduler {
@@ -43,7 +47,23 @@ public class Scheduler {
             
             // 시가총액 Insert
             InsertMarketCap insertStockData = new InsertMarketCap();
-            insertStockData.insert(conn);
+            ArrayList<HashMap<String, String>> marketCapList = insertStockData.insert(conn);
+            
+            // 투자자별 매매동향
+            if (marketCapList != null) {
+//        		// 투자자별 매매동향 제외 대상 목록
+        		HashMap<String, String> exceptList = Const.getExceptCompany();
+
+        		InsertInvestorTrading insertInvestorTrading = new InsertInvestorTrading(); 
+            	for (int i = 0; i < marketCapList.size(); i++) {
+            		String company_code = marketCapList.get(0).get(Const.COL_NAME_COMPANY_CODE);
+        			
+        			if (!exceptList.containsKey(company_code)) {
+        				insertInvestorTrading.insert(conn, company_code);
+        			}
+            	}
+			}
+            
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
